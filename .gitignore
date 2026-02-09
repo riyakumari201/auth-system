@@ -1,13 +1,13 @@
-# Python
+# Python cache
 __pycache__/
 *.pyc
 
-# Virtual environment
+# Virtual environments
 venv/
 env/
 
-# Database
-users.db
+# Databases
+*.db
 
 # Environment variables
 .env
