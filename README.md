@@ -1,43 +1,23 @@
-Flask Authentication System
+# Secure Authentication System (Flask)
 
-A secure Flask-based authentication system that allows users to register, log in, access protected routes, and log out using session-based authentication, hashed passwords, and SQLite database.
+A secure login system built with Flask that implements
+password hashing, failed login attempt tracking, and
+temporary account lockout to mitigate brute-force attacks.
 
-This project demonstrates backend fundamentals, security best practices, and real-world authentication flow.
+## Features
+- Secure password hashing
+- Failed login attempt tracking
+- Account lockout after multiple failed attempts
+- Automatic unlock after time-based validation
+- User feedback using flash messages
 
-Features
+## Tech Stack
+- Python
+- Flask
+- SQLite
+- HTML/CSS
 
-User Registration with secure password hashing
-
-User Login with credential verification
-
-Session-based authentication
-
-Protected routes (only logged-in users can access)
-
-Logout functionality
-
-SQLite database integration
-
-Flash messages for user feedback
-
-Clean and simple authentication flow
-
-🛠 Tech Stack
-
-Backend: Flask (Python)
-
-Database: SQLite
-
-Security: Werkzeug password hashing
-
-Session Management: Flask sessions
-
-Version Control: Git & GitHub
-
-📂 Project Structure
-auth-system/
-│
-├── app.py          # Main Flask application
-├── users.db        # SQLite database
-├── README.md       # Project documentation
-└── requirements.txt (optional)
+## How to Run
+```bash
+pip install -r requirements.txt
+python app.py

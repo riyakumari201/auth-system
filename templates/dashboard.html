@@ -4,14 +4,14 @@
 
 {% block content %}
 <div class="container">
-    <h2>Dashboard</h2>
+    <h2>Welcome 👋</h2>
 
-    <p><strong>Logged in user:</strong> {{ session.username }}</p>
-    <p><strong>User ID:</strong> {{ session.user_id }}</p>
-
-    <p>
-        This page is protected.<br>
-        If you logout, session data is cleared and this page cannot be accessed.
+    <p style="text-align:center; margin-bottom:20px;">
+        Logged in as <b>{{ email }}</b>
     </p>
+
+    <form action="{{ url_for('logout') }}">
+        <button type="submit">Logout</button>
+    </form>
 </div>
 {% endblock %}

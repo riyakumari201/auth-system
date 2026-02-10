@@ -1,6 +1,10 @@
 # Python cache
+users.db
 __pycache__/
+.env
 *.pyc
+
+
 
 # Virtual environments
 venv/

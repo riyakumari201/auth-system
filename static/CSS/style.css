@@ -1,0 +1,135 @@
+/* ---------- RESET ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+}
+
+/* ---------- BODY ---------- */
+body {
+    min-height: 100vh;
+    background: linear-gradient(120deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ---------- CARD ---------- */
+.container {
+    width: 100%;
+    max-width: 380px;
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- HEADINGS ---------- */
+h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #1a202c;
+    font-size: 22px;
+}
+
+/* ---------- TEXT ---------- */
+p {
+    font-size: 14px;
+    color: #4a5568;
+}
+
+/* ---------- INPUTS ---------- */
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+    border: none;
+    cursor: pointer;
+}
+
+/* Login / Primary Button */
+.btn-login {
+    width: auto;
+    padding: 8px 22px;
+    border-radius: 999px;
+    background: #667eea;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    margin: 10px auto 0;
+    transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+}
+
+/* ---------- LINKS ---------- */
+.link {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.link a {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* ---------- MESSAGES ---------- */
+.error {
+    background: #fed7d7;
+    color: #9b2c2c;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.warning {
+    background: #fefcbf;
+    color: #744210;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.success {
+    background: #c6f6d5;
+    color: #22543d;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 480px) {
+    .container {
+        padding: 24px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+}

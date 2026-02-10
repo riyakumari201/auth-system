@@ -1,41 +1,36 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if "user_id" not in session:
-            flash("Please login first!")
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return decorated_function
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = "super_secret_key"
+app.secret_key = "supersecretkey"
+
+DB_NAME = "users.db"
+MAX_ATTEMPTS = 5
+LOCK_TIME = timedelta(minutes=10)
 
 
-# ---------- Database ----------
-def get_db_connection():
-    conn = sqlite3.connect("users.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+# ---------- DATABASE ----------
+def get_db():
+    return sqlite3.connect(DB_NAME, timeout=10)
 
 
-conn = get_db_connection()
-conn.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
-)
-""")
-conn.commit()
-conn.close()
+def init_db():
+    with get_db() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                failed_attempts INTEGER DEFAULT 0,
+                last_failed_login TEXT
+            )
+        """)
+        conn.commit()
 
 
-# ---------- Routes ----------
+# ---------- ROUTES ----------
 @app.route("/")
 def home():
     return redirect(url_for("login"))
@@ -44,21 +39,25 @@ def home():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
-        password = generate_password_hash(request.form["password"])
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not password:
+            return "All fields are required"
+
+        hashed_password = generate_password_hash(password)
 
         try:
-            conn = get_db_connection()
-            conn.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, password)
-            )
-            conn.commit()
-            conn.close()
-            flash("Registration successful! Please login.")
+            with get_db() as conn:
+                conn.execute(
+                    "INSERT INTO users (email, password) VALUES (?, ?)",
+                    (email, hashed_password)
+                )
+                conn.commit()
             return redirect(url_for("login"))
+
         except sqlite3.IntegrityError:
-            flash("Username already exists!")
+            return "Email already exists"
 
     return render_template("register.html")
 
@@ -66,39 +65,95 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        email = request.form.get("email")
+        password = request.form.get("password")
 
-        conn = get_db_connection()
-        user = conn.execute(
-            "SELECT * FROM users WHERE username = ?",
-            (username,)
-        ).fetchone()
-        conn.close()
+        with get_db() as conn:
+            conn.row_factory = sqlite3.Row
+            user = conn.execute(
+                "SELECT * FROM users WHERE email = ?",
+                (email,)
+            ).fetchone()
 
-        if user and check_password_hash(user["password"], password):
+        if not user:
+            return "Invalid email or password"
+
+        # Convert last_failed_login
+        last_failed = (
+            datetime.fromisoformat(user["last_failed_login"])
+            if user["last_failed_login"]
+            else None
+        )
+
+        # 🔒 Check if already locked
+        if user["failed_attempts"] >= MAX_ATTEMPTS:
+            if last_failed and datetime.now() - last_failed < LOCK_TIME:
+                return "Account locked. Try again after 10 minutes."
+            else:
+                # Unlock after time
+                with get_db() as conn:
+                    conn.execute(
+                        "UPDATE users SET failed_attempts = 0 WHERE id = ?",
+                        (user["id"],)
+                    )
+                    conn.commit()
+
+        # ✅ Correct password
+        if check_password_hash(user["password"], password):
+            with get_db() as conn:
+                conn.execute(
+                    """
+                    UPDATE users
+                    SET failed_attempts = 0, last_failed_login = NULL
+                    WHERE id = ?
+                    """,
+                    (user["id"],)
+                )
+                conn.commit()
+
             session["user_id"] = user["id"]
-            session["username"] = user["username"]
+            session["email"] = user["email"]
             return redirect(url_for("dashboard"))
+
+        # ❌ Wrong password → increment FIRST
         else:
-            flash("Invalid credentials")
+            new_attempts = user["failed_attempts"] + 1
+
+            with get_db() as conn:
+                conn.execute(
+                    """
+                    UPDATE users
+                    SET failed_attempts = ?, last_failed_login = ?
+                    WHERE id = ?
+                    """,
+                    (new_attempts, datetime.now().isoformat(), user["id"])
+                )
+                conn.commit()
+
+            if new_attempts >= MAX_ATTEMPTS:
+                return "Account locked. Try again after 10 minutes."
+
+            return "Invalid email or password"
 
     return render_template("login.html")
 
 
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    return render_template("dashboard.html")
 
+@app.route("/dashboard")
+def dashboard():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return render_template("dashboard.html", email=session["email"])
 
 
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Logged out successfully!")
     return redirect(url_for("login"))
 
 
+# ---------- RUN ----------
 if __name__ == "__main__":
-    app.run(debug=True)
+    init_db()
+    app.run(debug=True, threaded=False)
