@@ -1,20 +1,3 @@
-# Python cache
 users.db
 __pycache__/
 .env
-*.pyc
-
-
-
-# Virtual environments
-venv/
-env/
-
-# Databases
-*.db
-
-# Environment variables
-.env
-
-# OS files
-.DS_Store
