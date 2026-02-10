@@ -35,27 +35,30 @@ A secure user authentication system built using **Flask**, **SQLite**, **HTML**,
 
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
+```text
 auth-system/
 │── app.py
-│── users.db (ignored via .gitignore)
 │── requirements.txt
-│── templates/
-│ ├── login.html
-│ ├── register.html
-│ └── dashboard.html
-│── static/CSS
-│ └── style.css
-│── screenshots/
-│ ├── login.png
-│ ├── error.png
-│ └── dashboard.png
 │── README.md
 │── .gitignore
+│
+├── templates/
+│   ├── login.html
+│   ├── register.html
+│   └── dashboard.html
+│
+├── static/
+│   └── CSS/
+│       └── style.css
+│
+├── screenshots/
+│   ├── login.png
+│   ├── dashboard.png
+│   └── error.png
+```
 
-
----
 
 ## 📸 Screenshots
 
